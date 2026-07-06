@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1220" />
+  <meta name="description" content="PhactoryRx is a mobile-first pharmacology reference, interaction-label review, and study notebook PWA using public RxNorm and FDA label data." />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://rxnav.nlm.nih.gov https://api.fda.gov https://dailymed.nlm.nih.gov; img-src 'self' data:; style-src 'self'; script-src 'self'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests" />
+  <title>PhactoryRx</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to app</a>
+
+  <header class="app-header">
+    <div class="brand-lockup">
+      <div class="brand-mark" aria-hidden="true">Rx</div>
+      <div>
+        <p class="eyebrow">Tech Phactory Solutions LLC</p>
+        <h1>PhactoryRx</h1>
+      </div>
+    </div>
+    <button id="installBtn" class="ghost-btn hidden" type="button">Install</button>
+  </header>
+
+  <main id="main" class="app-shell">
+    <section class="hero-card" aria-labelledby="heroTitle">
+      <div>
+        <p class="eyebrow">Study-grade medication reference</p>
+        <h2 id="heroTitle">Search drugs, pair medications, review listed interaction text, and build a private study notebook.</h2>
+        <p class="muted">Uses public RxNorm naming data and openFDA product-label data. This is an educational reference tool, not medical advice, prescribing guidance, diagnosis, emergency care, or a clinical drug-interaction engine.</p>
+      </div>
+      <div class="source-grid" aria-label="Source status">
+        <span class="source-pill">No API keys</span>
+        <span class="source-pill">Local notes</span>
+        <span class="source-pill">RxNorm lookup</span>
+        <span class="source-pill">FDA label review</span>
+      </div>
+    </section>
+
+    <section class="control-card" aria-labelledby="searchTitle">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Drug lookup</p>
+          <h2 id="searchTitle">Find a medication or add a vitamin/supplement</h2>
+        </div>
+        <button id="clearAllBtn" class="ghost-btn small" type="button">Reset</button>
+      </div>
+
+      <form id="drugSearchForm" class="search-row" autocomplete="off">
+        <label class="sr-only" for="drugSearchInput">Medication, vitamin, supplement, or food cue</label>
+        <input id="drugSearchInput" name="drug" type="search" inputmode="search" placeholder="Example: warfarin, vitamin K, sertraline, grapefruit" maxlength="80" required />
+        <button class="primary-btn" type="submit">Search</button>
+      </form>
+
+      <div class="helper-row">
+        <button class="chip-btn" data-example="warfarin" type="button">warfarin</button>
+        <button class="chip-btn" data-example="vitamin K" type="button">vitamin K</button>
+        <button class="chip-btn" data-example="sertraline" type="button">sertraline</button>
+        <button class="chip-btn" data-example="ibuprofen" type="button">ibuprofen</button>
+        <button id="manualAddBtn" class="chip-btn strong" type="button">Add typed item</button>
+      </div>
+
+      <div id="statusBanner" class="status-banner" role="status" aria-live="polite"></div>
+      <div id="searchResults" class="result-grid" aria-live="polite"></div>
+    </section>
+
+    <nav class="tab-nav" aria-label="PhactoryRx app sections" role="tablist">
+      <button class="tab-btn active" data-tab="reference" type="button" role="tab" aria-selected="true">Reference</button>
+      <button class="tab-btn" data-tab="interactions" type="button" role="tab" aria-selected="false">Interactions</button>
+      <button class="tab-btn" data-tab="notebook" type="button" role="tab" aria-selected="false">Notebook</button>
+    </nav>
+
+    <section class="workspace-grid tab-panel" data-panel="reference" role="tabpanel">
+      <article class="detail-card" aria-labelledby="detailTitle">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Reference panel</p>
+            <h2 id="detailTitle">Drug details</h2>
+          </div>
+          <button id="saveDrugBtn" class="ghost-btn small" type="button" disabled>Save</button>
+        </div>
+        <div id="drugDetail" class="empty-state">
+          <p>Search for a medication to view naming data, identifiers, and available FDA label sections.</p>
+        </div>
+      </article>
+
+      <aside class="side-panel" aria-labelledby="listTitle">
+        <div class="section-head compact">
+          <div>
+            <p class="eyebrow">Session list</p>
+            <h2 id="listTitle">Interaction set</h2>
+          </div>
+          <button id="reviewLabelsBtn" class="ghost-btn small" type="button">Analyze</button>
+        </div>
+        <p class="muted tight">Add 2 or more medications, vitamins, supplements, or food cues. The interaction tab compares returned label sections pair-by-pair.</p>
+        <div id="medList" class="stack-list"></div>
+      </aside>
+    </section>
+
+    <section class="control-card tab-panel" data-panel="interactions" role="tabpanel" hidden aria-labelledby="interactionTitle">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Interaction tab</p>
+          <h2 id="interactionTitle">Pairwise label analyzer</h2>
+        </div>
+        <div class="button-row">
+          <button id="runInteractionBtn" class="primary-btn smallish" type="button">Run analysis</button>
+          <button id="copyReviewBtn" class="ghost-btn small" type="button">Copy</button>
+        </div>
+      </div>
+      <div class="warning-note">
+        <strong>Important:</strong> RxNav’s former drug-drug interaction service was discontinued. This tab searches returned public label text for direct pair mentions, outcome language, risk factors, and food/vitamin/supplement cues. It cannot prove a combination is safe. Verify with a licensed clinician or pharmacist.
+      </div>
+      <div class="method-grid">
+        <div class="method-item">
+          <strong>1. Pair 2+ items</strong>
+          <span>Use RxNorm results or “Add typed item” for vitamins, supplements, grapefruit, alcohol, caffeine, or food cues.</span>
+        </div>
+        <div class="method-item">
+          <strong>2. Pull label text</strong>
+          <span>The app reviews openFDA interaction, contraindication, warning, population, and OTC caution sections.</span>
+        </div>
+        <div class="method-item">
+          <strong>3. Output findings</strong>
+          <span>Each pair shows listed conditions, possible outcomes mentioned, risk factors, and supporting snippets.</span>
+        </div>
+      </div>
+      <div id="interactionReview" class="empty-state">
+        <p>Add two or more items to the interaction set, then tap Run analysis.</p>
+      </div>
+    </section>
+
+    <section class="control-card tab-panel" data-panel="notebook" role="tabpanel" hidden aria-labelledby="notebookTitle">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Private local data</p>
+          <h2 id="notebookTitle">Study notebook</h2>
+        </div>
+        <div class="button-row">
+          <button id="exportBtn" class="ghost-btn small" type="button">Export</button>
+          <button id="importBtn" class="ghost-btn small" type="button">Import</button>
+          <input id="importFile" class="hidden" type="file" accept="application/json" />
+        </div>
+      </div>
+      <div class="note-editor">
+        <label for="studyNotes">Notes for selected item</label>
+        <textarea id="studyNotes" placeholder="Mechanism, class, pearls, cautions, memorization hooks, patient counseling notes..." rows="8" disabled></textarea>
+        <button id="saveNotesBtn" class="primary-btn" type="button" disabled>Save notes</button>
+      </div>
+      <div id="savedLibrary" class="stack-list library-list"></div>
+    </section>
+
+    <section class="control-card" aria-labelledby="scopeTitle">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Scope & safety</p>
+          <h2 id="scopeTitle">What this app is and is not</h2>
+        </div>
+      </div>
+      <div class="scope-grid">
+        <div class="scope-item good">
+          <h3>Good for</h3>
+          <p>Medication lookup, pharmacology studying, RxNorm identifiers, personal notes, public-data exploration, and non-clinical review of label-listed interaction language.</p>
+        </div>
+        <div class="scope-item caution">
+          <h3>Not for</h3>
+          <p>Diagnosis, prescribing, dose adjustment, treatment decisions, emergency decisions, or replacing a pharmacist, physician, poison control center, official prescribing information, or clinical drug-interaction software.</p>
+        </div>
+      </div>
+      <p class="fine-print">This product uses publicly available data from the U.S. National Library of Medicine, National Institutes of Health, Department of Health and Human Services; NLM is not responsible for the product and does not endorse or recommend this or any other product. FDA label data can vary by product and may be incomplete, changed, delayed, or unavailable through public APIs.</p>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <span>Designed by Tech Phactory Solutions LLC</span>
+    <span>Educational reference only</span>
+  </footer>
+
+  <template id="resultTemplate">
+    <button class="result-card" type="button">
+      <span class="result-title"></span>
+      <span class="result-meta"></span>
+    </button>
+  </template>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
