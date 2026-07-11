@@ -1,68 +1,66 @@
 # PhactoryRx
 
-A mobile-first medication-label reference, interaction-label review, and pharmacology study notebook PWA designed by Tech Phactory Solutions LLC.
+PhactoryRx is a mobile-first medication lookup, official-label reference, interaction-label review, and private pharmacology notebook PWA designed by Tech Phactory Solutions LLC.
 
-**Tagline:** Medication labels, interaction clues, and pharmacology notes.
+## Medication lookup
 
-## What it does
+The reference workflow now prioritizes accuracy over returning a result at any cost:
 
-- Searches RxNorm public medication naming data through the U.S. National Library of Medicine.
-- Loads public FDA drug-label sections through openFDA.
-- Adds medications, vitamins, supplements, food cues, or custom typed items into an interaction set.
-- Provides an **Interaction** tab that compares 2+ selected items pair-by-pair.
-- Extracts listed public-label text for direct pair mentions, combined-condition language, possible outcomes, food/vitamin/supplement cues, contraindications, warnings, and risk-factor language.
-- Saves private study notes in the browser through LocalStorage.
-- Exports/imports your notebook and session interaction set as JSON.
-- Installs as a PWA on supported mobile browsers.
+1. Searches RxNorm for normalized ingredients, brand names, strengths, dosage forms, and drug products.
+2. Lets the user choose an ingredient for a general overview or an exact formulation for product-specific matching.
+3. Resolves the selected RxCUI and related ingredient, brand, route, dosage-form, and release-form information.
+4. Searches openFDA labels using exact RxCUI and exact ingredient/brand fallbacks.
+5. Scores returned labels and rejects low-confidence, veterinary, unrelated, wrong-combination, wrong-route, and wrong-release-form records.
+6. Automatically displays:
+   - Uses / indications or OTC purpose
+   - Description
+   - How it works / mechanism when available
+   - Drug class when available
+   - Expandable official label sections
+   - A link to the matching DailyMed label when a SET ID is available
 
-## Interaction tab behavior
+If a reliable label match cannot be established, the app shows no description rather than presenting a likely-wrong one.
 
-The interaction tab is a public-label analyzer, not a clinical decision-support engine. It:
+## Interaction tab
 
-1. Pulls returned openFDA label sections for each selected item.
-2. Builds every pair combination from the selected interaction set.
-3. Searches each item label for the other item name, generic/brand/substance terms, and relevant vitamin/food/supplement cues.
-4. Displays supporting snippets, possible outcome signals mentioned in the returned text, and risk-factor language.
+- Add 2–10 medications, vitamins, supplements, foods, or custom terms.
+- Compare each pair against returned public label sections.
+- Review direct pair mentions, possible outcomes, risk factors, warning language, and supporting text.
 
-Absence of a direct mention does **not** prove a combination is safe. Public label data varies by manufacturer, product, ingredient, route, and dosage form.
+This remains a public-label analyzer, not a clinical interaction engine. Missing label text does not prove that a combination is safe.
 
-## What it does not do
+## Notebook and PWA features
 
-This is not a clinical decision-support system. It does not diagnose, prescribe, adjust dosage, determine real drug-drug interaction severity, or replace a pharmacist, physician, official prescribing information, poison control center, emergency services, or professional clinical interaction software.
-
-RxNav's old drug-drug interaction feature was discontinued, so this app intentionally does not fake a black-box clinical interaction checker. It provides FDA label-text review only.
+- Saves notes locally in the browser.
+- Imports and exports notebook data as JSON.
+- Preserves migration from older PhactoryRx storage keys.
+- Installs as a PWA on supported browsers.
+- Includes iPhone/iPad home-screen icons and Safari Add to Home Screen guidance.
+- Contains no backend, passwords, private keys, or embedded API credentials.
 
 ## Data sources
 
 - RxNorm/RxNav APIs: `https://rxnav.nlm.nih.gov/REST`
 - openFDA drug label API: `https://api.fda.gov/drug/label.json`
+- DailyMed official-label links: `https://dailymed.nlm.nih.gov/`
 
-The app has no backend, no secrets, and no API keys.
+Public data can be incomplete, delayed, unavailable, or different between manufacturers and formulations. PhactoryRx is for education and reference only and must not be used to diagnose, prescribe, change a dose, or replace a pharmacist or physician.
 
 ## GitHub Pages deployment
 
-1. Upload these files to a GitHub repository.
-2. Go to **Settings → Pages**.
+1. Upload the files in this folder to the root of a GitHub repository.
+2. Open **Settings → Pages**.
 3. Choose **Deploy from a branch**.
 4. Select the `main` branch and `/root` folder.
-5. Save, then wait for GitHub Pages to publish the site.
-
-## Safety / privacy
-
-- Personal notes stay in the browser unless you export them.
-- Do not store protected health information if you plan to share the device, browser profile, or exported notebook file.
-- Public API requests may include the drug, vitamin, supplement, or food terms you search.
-- No passwords, tokens, API keys, or environment variables are included.
+5. Save.
 
 ## Local testing
-
-Open `index.html` directly, or serve the folder locally:
 
 ```bash
 python3 -m http.server 8080
 ```
 
-Then visit `http://localhost:8080`.
+Then open `http://localhost:8080`.
 
 ## NLM attribution
 

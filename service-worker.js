@@ -1,45 +1,82 @@
 'use strict';
 
-const CACHE_NAME = 'phactoryrx-v1';
-const CORE_ASSETS = [
+const CACHE_NAME = 'phactoryrx-v5-medication-lookup';
+const APP_SHELL = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   './manifest.webmanifest',
-  './icon.svg'
+  './icon.svg',
+  './icon-192.png',
+  './icon-512.png',
+  './apple-touch-icon.png'
 ];
+const NAVIGATION_FALLBACK = new URL('./index.html', self.registration.scope).href;
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS))
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => Promise.all(
-      keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-    ))
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))))
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
-  const requestUrl = new URL(event.request.url);
+  const { request } = event;
+  if (request.method !== 'GET') return;
 
-  if (requestUrl.origin !== self.location.origin) {
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+
+  if (request.mode === 'navigate') {
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(request, { cache: 'no-store' });
+        if (response.ok) {
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put(NAVIGATION_FALLBACK, response.clone());
+        }
+        return response;
+      } catch (error) {
+        return (await caches.match(NAVIGATION_FALLBACK))
+          || (await caches.match('./'))
+          || new Response('PhactoryRx is offline and the app shell is not cached yet.', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+          });
+      }
+    })());
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return cached || fetch(event.request).then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-        return response;
+  const networkUpdate = fetch(request, { cache: 'no-store' })
+    .then(async (response) => {
+      if (response.ok && response.type === 'basic') {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(request, response.clone());
+      }
+      return response;
+    });
+
+  // Keep the worker alive long enough to finish refreshing cached assets.
+  event.waitUntil(networkUpdate.then(() => undefined).catch(() => undefined));
+
+  event.respondWith((async () => {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    try {
+      return await networkUpdate;
+    } catch (error) {
+      return new Response('Offline', {
+        status: 503,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' }
       });
-    })
-  );
+    }
+  })());
 });

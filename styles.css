@@ -473,6 +473,14 @@ input[type="search"]:focus, textarea:focus { border-color: rgba(125,211,252,0.75
 .pair-card.caution { border-color: rgba(253,224,71,0.30); background: rgba(253,224,71,0.045); }
 .pair-card.unknown { border-color: rgba(196,181,253,0.28); }
 
+.coverage-note {
+  margin: -0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.coverage-note.partial { color: #ddd6fe; }
+
 .pair-head {
   display: flex;
   align-items: flex-start;
@@ -551,4 +559,140 @@ input[type="search"]:focus, textarea:focus { border-color: rgba(125,211,252,0.75
   .analysis-grid { grid-template-columns: 1fr; }
   .pair-head { flex-direction: column; }
   .risk-badge { white-space: normal; text-align: center; }
+}
+
+/* Audit repairs: stronger keyboard focus, long-text wrapping, and compact controls. */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[role="tabpanel"]:focus-visible {
+  outline: 3px solid rgba(125,211,252,0.72);
+  outline-offset: 3px;
+}
+
+.compact-actions { margin-top: 0; justify-content: flex-end; }
+.analysis-grid.single-row { grid-template-columns: 1fr; }
+.label-body,
+.evidence-block li,
+.stack-item,
+.result-title,
+.result-meta { overflow-wrap: anywhere; word-break: break-word; }
+
+[aria-busy="true"] { cursor: progress; }
+
+@media (max-width: 560px) {
+  .compact-actions { justify-content: flex-start; }
+  .primary-btn,
+  .ghost-btn,
+  .chip-btn,
+  .tab-btn { min-height: 2.75rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+
+/* Medication identity and verified-label summary */
+.lookup-help,
+.selection-guidance {
+  margin-top: 0.75rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.selection-guidance { margin-top: 0; }
+.label-container { padding-top: 1rem; }
+
+.verified-label-card {
+  display: grid;
+  gap: 0.55rem;
+  border: 1px solid rgba(134,239,172,0.30);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  background: rgba(134,239,172,0.055);
+}
+
+.verified-label-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.match-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(196,181,253,0.38);
+  border-radius: 999px;
+  padding: 0.42rem 0.7rem;
+  color: #ddd6fe;
+  background: rgba(196,181,253,0.08);
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-align: center;
+}
+
+.match-badge.exact {
+  color: #bbf7d0;
+  border-color: rgba(134,239,172,0.42);
+  background: rgba(134,239,172,0.08);
+}
+
+.official-link {
+  width: fit-content;
+  color: var(--accent);
+  font-weight: 800;
+  text-underline-offset: 0.2rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.summary-card {
+  display: grid;
+  align-content: start;
+  gap: 0.55rem;
+  min-height: 9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  background: rgba(255,255,255,0.04);
+}
+
+.summary-card.uses { border-color: rgba(125,211,252,0.28); }
+.summary-card.description { border-color: rgba(196,181,253,0.28); }
+.summary-card.mechanism { border-color: rgba(134,239,172,0.22); }
+.summary-card.class { border-color: rgba(253,224,71,0.22); }
+.summary-card p { color: var(--muted); line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.label-sections-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1rem;
+  margin-top: 1.2rem;
+}
+
+.accuracy-warning {
+  border-color: rgba(253,224,71,0.35);
+  background: rgba(253,224,71,0.045);
+}
+
+@media (max-width: 700px) {
+  .summary-grid { grid-template-columns: 1fr; }
+  .verified-label-head,
+  .label-sections-heading { flex-direction: column; align-items: flex-start; }
+  .match-badge { width: fit-content; }
 }

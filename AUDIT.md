@@ -1,60 +1,81 @@
-# Audit Report
+# PhactoryRx Medication Lookup Accuracy Audit
 
-## Branding update checks
+**Audit date:** July 11, 2026  
+**Build:** Medication lookup accuracy repair / PWA cache v5
 
-- Renamed the app from Phactory Pharmacology to **PhactoryRx**.
-- Updated browser title, header branding, PWA manifest name/short name, export metadata, notebook export filename, service-worker cache name, README, and icon accessibility label.
-- Preserved backward compatibility with old LocalStorage notebook keys so existing browser notes can migrate forward.
+## User-reported issue
 
-## Static checks completed
+Some medication searches previously displayed the wrong description. The earlier lookup relied too heavily on approximate names and broad label-field searches, which could select a label for a different formulation, combination product, or similarly named item.
 
-- JavaScript syntax check passed for `app.js` with `node --check`.
-- Service worker syntax check passed for `service-worker.js` with `node --check`.
-- Manifest JSON validation passed with `python3 -m json.tool`.
-- Secret scan checked for common API key/password/token markers. No credential values, API keys, passwords, authorization headers, or bearer tokens were found.
-- App is static-only: HTML, CSS, JavaScript, manifest, service worker, and SVG icon.
+## Repairs completed
 
-## New interaction-tab checks
+### Exact medication identification
 
-- Added a dedicated Interactions tab.
-- Added manual typed-item support for vitamins, supplements, grapefruit, alcohol, caffeine, food cues, or non-RxNorm items.
-- Added pairwise analysis for 2+ selected items.
-- Added extraction of direct pair mentions from returned label sections.
-- Added food/vitamin/supplement cue extraction.
-- Added possible-outcome and risk-factor signal extraction from public label text.
-- Added copyable interaction report output.
-- Preserved educational-only medical safety wording.
+- Added RxNorm `getDrugs` results so users can choose ingredient, brand, strength, dosage form, generic product, branded product, or pack.
+- Added exact-or-normalized RxCUI lookup before approximate fallback.
+- Increased useful search coverage while deduplicating concepts and suppressing inactive results.
+- Added human-readable result types and clear guidance to choose the correct strength/formulation.
 
-## Security posture
+### Safer label matching
 
-- No backend server.
-- No environment variables.
-- No embedded credentials.
-- No third-party JavaScript libraries.
-- No `eval` or dynamic script loading.
-- Content Security Policy restricts scripts/styles to local files and allows network calls only to public medication-data endpoints.
+- Resolves related RxNorm ingredients, brands, routes, dosage forms, and formulation modifiers before querying labels.
+- Prioritizes exact product RxCUI matches.
+- Uses exact ingredient and brand fallbacks only when needed.
+- Rejects veterinary/animal labels.
+- Rejects combination-product labels for single-ingredient searches.
+- Preserves legitimate multi-ingredient medication matching.
+- Penalizes wrong route and dosage-form matches.
+- Distinguishes extended-release, delayed-release, immediate-release, controlled-release, sustained-release, enteric-coated, chewable, disintegrating, and effervescent formulations.
+- Refuses to display a label below the minimum confidence threshold.
 
-## Medical safety posture
+### Uses and description output
 
-- The app labels itself as educational/reference-only.
-- It avoids pretending to provide clinical drug-drug interaction severity.
-- It clearly explains that RxNav's drug-drug interaction feature was discontinued and uses public label text review instead.
-- It does not provide individualized medical advice, diagnosis, prescribing decisions, or dosage recommendations.
-- Interaction analysis reports supporting snippets and signal language instead of issuing medical instructions.
+- Medication labels now load automatically after selecting a search result.
+- Added prominent summary cards for:
+  - Uses / indications or OTC purpose
+  - Description
+  - Mechanism / how it works
+  - Drug class
+- Added additional expandable sections for purpose, description, mechanism of action, clinical pharmacology, and active ingredient.
+- Added a direct DailyMed official-label link when a valid SPL SET ID is returned.
+- Added a visible match explanation such as exact product RxCUI, ingredient match, or brand-name match.
 
-## Known limits
+### Existing systems preserved
 
-- Public API availability and rate limits can affect lookups.
-- openFDA labels vary by manufacturer/product and may not include every section for every drug.
-- Manual supplement/food items may not have matching FDA drug labels.
-- Absence of a direct pair mention does not prove safety.
-- LocalStorage notes stay only on the current browser/device unless exported.
+- Interaction analysis remains operational and uses the same stricter label selection.
+- Notebook save/import/export and legacy storage migration remain intact.
+- PWA cache was bumped to `phactoryrx-v5-medication-lookup` so installed copies retrieve the repaired JavaScript and CSS.
 
-## Latest static validation after PhactoryRx rename
+## Automated tests completed
 
-- `node --check app.js` passed.
-- `node --check service-worker.js` passed.
-- `python3 -m json.tool manifest.webmanifest` passed.
-- Duplicate HTML ID check passed.
-- Required app element ID check passed.
-- Secret-marker scan found only false positives from words such as `risk-badge` and documentation statements saying no secrets/passwords are included; no credential values, API keys, bearer tokens, or authorization headers were found.
+### Syntax and structural checks
+
+- `node --check app.js`
+- `node --check service-worker.js`
+- Manifest JSON parse and PWA field checks
+- HTML duplicate-ID and referenced-element checks
+- Local linked-asset existence checks
+- CSS parser validation
+- PNG dimensions and format validation
+- Common secret/private-key marker scan
+
+### Deterministic API/matching tests
+
+Mocked RxNorm and openFDA responses verified:
+
+- ingredient and formulation results are both returned;
+- a correct single-ingredient human label beats a combination label sharing the ingredient RxCUI;
+- animal/veterinary labels are rejected;
+- uses, description, mechanism, and pharmacologic class summaries are extracted;
+- formulation fallback selects the correct single-ingredient label;
+- true combination medications match combination labels and reject incomplete single-ingredient labels;
+- extended-release labels outrank immediate-release labels for an extended-release selection;
+- unrelated medication labels remain below the acceptance threshold.
+
+## Test limitation
+
+The isolated build environment could not connect directly to the live RxNorm or openFDA hosts. Network behavior was checked against the current official API documentation and exercised with deterministic mock responses. Live services may still experience outages, rate limiting, missing harmonized identifiers, or label variation.
+
+## Safety limitation
+
+PhactoryRx is an educational reference tool. It is not validated clinical decision-support software and does not diagnose, prescribe, recommend dosage changes, determine that a drug combination is safe, or replace official prescribing information or licensed medical professionals.
