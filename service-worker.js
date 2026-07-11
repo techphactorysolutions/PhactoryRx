@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'phactoryrx-v5-medication-lookup';
+const CACHE_NAME = 'phactoryrx-v6-tabs-ui';
 const APP_SHELL = [
   './',
   './index.html',

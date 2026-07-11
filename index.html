@@ -24,168 +24,121 @@
     <div class="brand-lockup">
       <div class="brand-mark" aria-hidden="true">Rx</div>
       <div>
-        <p class="eyebrow">Tech Phactory Solutions LLC</p>
         <h1>PhactoryRx</h1>
+        <p class="tagline">Medication reference &amp; study notebook</p>
       </div>
     </div>
-    <button id="installBtn" class="ghost-btn hidden" type="button">Install</button>
+    <button id="installBtn" class="ghost-btn small hidden" type="button">Install</button>
   </header>
 
-  <main id="main" class="app-shell">
-    <section class="hero-card" aria-labelledby="heroTitle">
-      <div>
-        <p class="eyebrow">Study-grade medication reference</p>
-        <h2 id="heroTitle">Look up medications by ingredient, brand, strength, or dosage form and get matched uses and a description.</h2>
-        <p class="muted">PhactoryRx resolves the selected RxNorm medication concept first, then displays uses and description only from a sufficiently matched human-drug label. It is an educational reference tool, not medical advice, diagnosis, prescribing guidance, or emergency care.</p>
-      </div>
-      <div class="source-grid" aria-label="Source status">
-        <span class="source-pill">No API keys</span>
-        <span class="source-pill">Local notes</span>
-        <span class="source-pill">RxNorm lookup</span>
-        <span class="source-pill">FDA label review</span>
-      </div>
-    </section>
-
-    <section class="control-card" aria-labelledby="searchTitle">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Drug lookup</p>
-          <h2 id="searchTitle">Find a medication and choose the correct formulation</h2>
-        </div>
-        <button id="clearAllBtn" class="ghost-btn small" type="button">Clear search</button>
-      </div>
-
-      <form id="drugSearchForm" class="search-row" autocomplete="off">
-        <label class="sr-only" for="drugSearchInput">Medication, vitamin, supplement, or food cue</label>
-        <input id="drugSearchInput" name="drug" type="search" inputmode="search" placeholder="Example: metformin, Tylenol, amoxicillin 500 mg" maxlength="80" required />
-        <button id="searchSubmitBtn" class="primary-btn" type="submit">Search</button>
-      </form>
-      <p class="lookup-help">Choose an <strong>ingredient</strong> for a general medication overview, or choose the exact <strong>strength and dosage form</strong> for product-specific information.</p>
-
-      <div class="helper-row">
-        <button class="chip-btn" data-example="metformin" type="button">metformin</button>
-        <button class="chip-btn" data-example="Tylenol" type="button">Tylenol</button>
-        <button class="chip-btn" data-example="amoxicillin 500 mg oral capsule" type="button">amoxicillin 500 mg</button>
-        <button class="chip-btn" data-example="sertraline" type="button">sertraline</button>
-        <button id="manualAddBtn" class="chip-btn strong" type="button">Add typed item</button>
-      </div>
-
-      <div id="statusBanner" class="status-banner" role="status" aria-live="polite" aria-atomic="true"></div>
-      <div id="searchResults" class="result-grid" aria-live="polite"></div>
-    </section>
-
+  <div class="tab-bar">
     <nav class="tab-nav" aria-label="PhactoryRx app sections" role="tablist">
-      <button id="tab-reference" class="tab-btn active" data-tab="reference" type="button" role="tab" aria-controls="panel-reference" aria-selected="true" tabindex="0">Reference</button>
+      <button id="tab-reference" class="tab-btn active" data-tab="reference" type="button" role="tab" aria-controls="panel-reference" aria-selected="true" tabindex="0">Lookup</button>
       <button id="tab-interactions" class="tab-btn" data-tab="interactions" type="button" role="tab" aria-controls="panel-interactions" aria-selected="false" tabindex="-1">Interactions</button>
       <button id="tab-notebook" class="tab-btn" data-tab="notebook" type="button" role="tab" aria-controls="panel-notebook" aria-selected="false" tabindex="-1">Notebook</button>
     </nav>
+    <div id="statusBanner" class="status-banner" role="status" aria-live="polite" aria-atomic="true"></div>
+  </div>
 
-    <section id="panel-reference" class="workspace-grid tab-panel" data-panel="reference" role="tabpanel" aria-labelledby="tab-reference" tabindex="0">
-      <article class="detail-card" aria-labelledby="detailTitle">
+  <main id="main" class="app-shell">
+    <section id="panel-reference" class="tab-panel" data-panel="reference" role="tabpanel" aria-labelledby="tab-reference" tabindex="0">
+      <section class="panel-card" aria-labelledby="searchTitle">
         <div class="section-head">
-          <div>
-            <p class="eyebrow">Reference panel</p>
-            <h2 id="detailTitle">Drug details</h2>
-          </div>
-          <button id="saveDrugBtn" class="ghost-btn small" type="button" disabled>Save</button>
+          <h2 id="searchTitle">Find a medication</h2>
+          <button id="clearAllBtn" class="ghost-btn small" type="button">Clear</button>
+        </div>
+        <form id="drugSearchForm" class="search-row" autocomplete="off">
+          <label class="sr-only" for="drugSearchInput">Medication, brand, or strength</label>
+          <input id="drugSearchInput" name="drug" type="search" inputmode="search" placeholder="metformin, Tylenol, amoxicillin 500 mg…" maxlength="80" required />
+          <button id="searchSubmitBtn" class="primary-btn" type="submit">Search</button>
+        </form>
+        <div class="helper-row">
+          <button class="chip-btn" data-example="metformin" type="button">metformin</button>
+          <button class="chip-btn" data-example="Tylenol" type="button">Tylenol</button>
+          <button class="chip-btn" data-example="amoxicillin 500 mg oral capsule" type="button">amoxicillin 500 mg</button>
+          <button class="chip-btn" data-example="sertraline" type="button">sertraline</button>
+        </div>
+        <p class="lookup-help">Pick an <strong>ingredient</strong> for a general overview, or the exact <strong>strength and form</strong> for product-specific details.</p>
+        <div id="searchResults" class="result-grid" aria-live="polite"></div>
+      </section>
+
+      <section class="panel-card" aria-labelledby="detailTitle">
+        <div class="section-head">
+          <h2 id="detailTitle">Drug details</h2>
+          <button id="saveDrugBtn" class="ghost-btn small" type="button" disabled>Save to notebook</button>
         </div>
         <div id="drugDetail" class="empty-state">
-          <p>Search for a medication, choose the correct ingredient or formulation, and PhactoryRx will load matched uses and a description automatically.</p>
+          <p>Search above and choose the correct ingredient or formulation. Matched uses and a description load automatically.</p>
         </div>
-      </article>
+      </section>
+    </section>
 
-      <aside class="side-panel" aria-labelledby="listTitle">
-        <div class="section-head compact">
-          <div>
-            <p class="eyebrow">Session list</p>
-            <h2 id="listTitle">Interaction set</h2>
-          </div>
-          <div class="button-row compact-actions">
-            <button id="reviewLabelsBtn" class="ghost-btn small" type="button">Analyze</button>
-            <button id="clearMedListBtn" class="ghost-btn small" type="button">Clear set</button>
+    <section id="panel-interactions" class="tab-panel" data-panel="interactions" role="tabpanel" hidden aria-labelledby="tab-interactions" tabindex="0">
+      <section class="panel-card" aria-labelledby="interactionTitle">
+        <div class="section-head">
+          <h2 id="interactionTitle">Interaction check</h2>
+          <div class="button-row">
+            <button id="runInteractionBtn" class="primary-btn small" type="button">Run analysis</button>
+            <button id="copyReviewBtn" class="ghost-btn small" type="button" disabled>Copy</button>
           </div>
         </div>
-        <p class="muted tight">Add 2 or more medications, vitamins, supplements, or food cues. The interaction tab compares returned label sections pair-by-pair.</p>
+
+        <p class="muted tight">Compare 2–10 items pair-by-pair against public FDA label text. Add medications from the Lookup tab, or type anything below (vitamins, grapefruit, alcohol, caffeine…).</p>
+
+        <form id="interactionAddForm" class="search-row" autocomplete="off">
+          <label class="sr-only" for="interactionAddInput">Add an item to compare</label>
+          <input id="interactionAddInput" name="item" type="search" inputmode="search" placeholder="Add item: ibuprofen, vitamin D, grapefruit…" maxlength="80" />
+          <button id="manualAddBtn" class="ghost-btn" type="submit">Add</button>
+        </form>
+
+        <div class="section-head sub">
+          <h3>Items to compare</h3>
+          <button id="clearMedListBtn" class="ghost-btn small" type="button">Clear set</button>
+        </div>
         <div id="medList" class="stack-list"></div>
-      </aside>
+
+        <div class="warning-note">
+          This tab only searches returned public label text. It cannot prove a combination is safe — verify with a licensed clinician or pharmacist.
+        </div>
+
+        <div id="interactionReview" class="empty-state">
+          <p>Add two or more items to the interaction set, then tap Run analysis.</p>
+        </div>
+      </section>
     </section>
 
-    <section id="panel-interactions" class="control-card tab-panel" data-panel="interactions" role="tabpanel" hidden aria-labelledby="tab-interactions interactionTitle" tabindex="0">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Interaction tab</p>
-          <h2 id="interactionTitle">Pairwise label analyzer</h2>
-        </div>
-        <div class="button-row">
-          <button id="runInteractionBtn" class="primary-btn smallish" type="button">Run analysis</button>
-          <button id="copyReviewBtn" class="ghost-btn small" type="button" disabled>Copy</button>
-        </div>
-      </div>
-      <div class="warning-note">
-        <strong>Important:</strong> RxNav’s former drug-drug interaction service was discontinued. This tab searches returned public label text for direct pair mentions, outcome language, risk factors, and food/vitamin/supplement cues. It cannot prove a combination is safe. Verify with a licensed clinician or pharmacist.
-      </div>
-      <div class="method-grid">
-        <div class="method-item">
-          <strong>1. Pair 2+ items</strong>
-          <span>Use RxNorm results or “Add typed item” for vitamins, supplements, grapefruit, alcohol, caffeine, or food cues.</span>
-        </div>
-        <div class="method-item">
-          <strong>2. Pull label text</strong>
-          <span>The app reviews openFDA interaction, contraindication, warning, population, and OTC caution sections.</span>
-        </div>
-        <div class="method-item">
-          <strong>3. Output findings</strong>
-          <span>Each pair shows listed conditions, possible outcomes mentioned, risk factors, and supporting snippets.</span>
-        </div>
-      </div>
-      <div id="interactionReview" class="empty-state">
-        <p>Add two or more items to the interaction set, then tap Run analysis.</p>
-      </div>
-    </section>
-
-    <section id="panel-notebook" class="control-card tab-panel" data-panel="notebook" role="tabpanel" hidden aria-labelledby="tab-notebook notebookTitle" tabindex="0">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Private local data</p>
+    <section id="panel-notebook" class="tab-panel" data-panel="notebook" role="tabpanel" hidden aria-labelledby="tab-notebook" tabindex="0">
+      <section class="panel-card" aria-labelledby="notebookTitle">
+        <div class="section-head">
           <h2 id="notebookTitle">Study notebook</h2>
+          <div class="button-row">
+            <button id="exportBtn" class="ghost-btn small" type="button">Export</button>
+            <button id="importBtn" class="ghost-btn small" type="button">Import</button>
+            <input id="importFile" class="hidden" type="file" accept="application/json" />
+          </div>
         </div>
-        <div class="button-row">
-          <button id="exportBtn" class="ghost-btn small" type="button">Export</button>
-          <button id="importBtn" class="ghost-btn small" type="button">Import</button>
-          <input id="importFile" class="hidden" type="file" accept="application/json" />
+        <div class="note-editor">
+          <label for="studyNotes">Notes for selected item</label>
+          <textarea id="studyNotes" placeholder="Mechanism, class, pearls, cautions, memorization hooks…" rows="7" maxlength="20000" disabled></textarea>
+          <button id="saveNotesBtn" class="primary-btn" type="button" disabled>Save notes</button>
         </div>
-      </div>
-      <div class="note-editor">
-        <label for="studyNotes">Notes for selected item</label>
-        <textarea id="studyNotes" placeholder="Mechanism, class, pearls, cautions, memorization hooks, patient counseling notes..." rows="8" maxlength="20000" disabled></textarea>
-        <button id="saveNotesBtn" class="primary-btn" type="button" disabled>Save notes</button>
-      </div>
-      <div id="savedLibrary" class="stack-list library-list"></div>
+        <div id="savedLibrary" class="stack-list library-list"></div>
+      </section>
     </section>
 
-    <section class="control-card" aria-labelledby="scopeTitle">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Scope & safety</p>
-          <h2 id="scopeTitle">What this app is and is not</h2>
-        </div>
+    <details class="label-section scope-details">
+      <summary>What this app is and is not</summary>
+      <div class="label-body">
+        <strong>Good for:</strong> medication lookup by ingredient, brand, strength, or dosage form; matched uses and descriptions; pharmacology studying; RxNorm identifiers; personal notes; and non-clinical review of label-listed interaction language.
+
+        <strong>Not for:</strong> diagnosis, prescribing, dose adjustment, treatment or emergency decisions, or replacing a pharmacist, physician, poison control center, official prescribing information, or clinical drug-interaction software. RxNav’s former drug-drug interaction service was discontinued; the Interactions tab reviews public label text only.
       </div>
-      <div class="scope-grid">
-        <div class="scope-item good">
-          <h3>Good for</h3>
-          <p>Medication lookup by ingredient, brand, strength, or dosage form; matched uses and descriptions; pharmacology studying; RxNorm identifiers; personal notes; and non-clinical review of label-listed interaction language.</p>
-        </div>
-        <div class="scope-item caution">
-          <h3>Not for</h3>
-          <p>Diagnosis, prescribing, dose adjustment, treatment decisions, emergency decisions, or replacing a pharmacist, physician, poison control center, official prescribing information, or clinical drug-interaction software.</p>
-        </div>
-      </div>
-      <p class="fine-print">This product uses publicly available data from the U.S. National Library of Medicine, National Institutes of Health, Department of Health and Human Services; NLM is not responsible for the product and does not endorse or recommend this or any other product. FDA label data can vary by product and may be incomplete, changed, delayed, or unavailable through public APIs.</p>
-    </section>
+    </details>
+    <p class="fine-print">This product uses publicly available data from the U.S. National Library of Medicine, National Institutes of Health, Department of Health and Human Services; NLM is not responsible for the product and does not endorse or recommend this or any other product. FDA label data can vary by product and may be incomplete, changed, delayed, or unavailable through public APIs.</p>
   </main>
 
   <footer class="app-footer">
-    <span>Designed by Tech Phactory Solutions LLC</span>
+    <span>Tech Phactory Solutions LLC</span>
     <span>Educational reference only</span>
   </footer>
 

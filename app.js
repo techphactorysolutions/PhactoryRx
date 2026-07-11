@@ -116,6 +116,8 @@ const dom = {
   exportBtn: document.querySelector('#exportBtn'),
   importBtn: document.querySelector('#importBtn'),
   importFile: document.querySelector('#importFile'),
+  interactionAddForm: document.querySelector('#interactionAddForm'),
+  interactionAddInput: document.querySelector('#interactionAddInput'),
   tabBtns: Array.from(document.querySelectorAll('[data-tab]')),
   tabPanels: Array.from(document.querySelectorAll('[data-panel]'))
 };
@@ -1028,7 +1030,6 @@ function selectDrug(drug) {
   const saved = appState.library[drug.rxcui];
   dom.studyNotes.value = saved?.notes ?? '';
   renderSelectedDrugSkeleton(drug);
-  setActiveTab('reference');
   loadAndRenderLabel(drug);
 }
 
@@ -1142,15 +1143,14 @@ function addDrugToMedList(drug) {
 }
 
 function addTypedItemToMedList() {
-  const name = dom.drugSearchInput.value.trim();
+  const name = (dom.interactionAddInput?.value || '').trim();
   if (!name) {
     setStatus('Type a medication, vitamin, supplement, or food cue first.', 'error');
     return;
   }
   const manual = { rxcui: manualItemId(name), name, tty: 'Manual review item' };
   addDrugToMedList(manual);
-  selectDrug(manual);
-  setActiveTab('reference');
+  if (dom.interactionAddInput) dom.interactionAddInput.value = '';
 }
 
 function removeDrugFromMedList(rxcui) {
@@ -1204,7 +1204,7 @@ function renderMedList() {
         const cached = appState.searchResults.find((item) => item.rxcui === rxcui) || appState.medList.find((item) => item.rxcui === rxcui);
         if (cached) {
           selectDrug(cached);
-          setActiveTab('reference');
+          setActiveTab('reference', { scroll: true });
         }
       }
     });
@@ -1463,7 +1463,7 @@ async function reviewLabels() {
 
   appState.interactionRunning = true;
   dom.runInteractionBtn.disabled = true;
-  dom.reviewLabelsBtn.disabled = true;
+  if (dom.reviewLabelsBtn) dom.reviewLabelsBtn.disabled = true;
   dom.clearMedListBtn.disabled = true;
   dom.copyReviewBtn.disabled = true;
   dom.interactionReview.setAttribute('aria-busy', 'true');
@@ -1524,7 +1524,7 @@ async function reviewLabels() {
   } finally {
     appState.interactionRunning = false;
     dom.runInteractionBtn.disabled = false;
-    dom.reviewLabelsBtn.disabled = false;
+    if (dom.reviewLabelsBtn) dom.reviewLabelsBtn.disabled = false;
     dom.clearMedListBtn.disabled = false;
     dom.interactionReview.removeAttribute('aria-busy');
   }
@@ -1628,7 +1628,7 @@ function resetApp() {
   setStatus('');
 }
 
-function setActiveTab(tabName) {
+function setActiveTab(tabName, options = {}) {
   const target = tabName || 'reference';
   dom.tabBtns.forEach((button) => {
     const isActive = button.getAttribute('data-tab') === target;
@@ -1639,6 +1639,10 @@ function setActiveTab(tabName) {
   dom.tabPanels.forEach((panel) => {
     panel.hidden = panel.getAttribute('data-panel') !== target;
   });
+  if (options.scroll) {
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+  }
 }
 
 function registerServiceWorker() {
@@ -1713,18 +1717,29 @@ function wireInstallPrompt() {
 }
 
 function bindEvents() {
-  dom.drugSearchForm.addEventListener('submit', handleSearch);
-  dom.clearAllBtn.addEventListener('click', resetApp);
-  dom.clearMedListBtn.addEventListener('click', clearMedList);
-  dom.manualAddBtn.addEventListener('click', addTypedItemToMedList);
-  dom.saveDrugBtn.addEventListener('click', saveSelectedDrug);
-  dom.saveNotesBtn.addEventListener('click', saveSelectedNotes);
-  dom.reviewLabelsBtn.addEventListener('click', reviewLabels);
-  dom.runInteractionBtn.addEventListener('click', reviewLabels);
-  dom.exportBtn.addEventListener('click', exportNotebook);
-  dom.importBtn.addEventListener('click', () => dom.importFile.click());
-  dom.importFile.addEventListener('change', () => importNotebook(dom.importFile.files?.[0]));
-  dom.copyReviewBtn.addEventListener('click', async () => {
+  const on = (element, type, handler) => { if (element) element.addEventListener(type, handler); };
+
+  on(dom.drugSearchForm, 'submit', handleSearch);
+  on(dom.clearAllBtn, 'click', resetApp);
+  on(dom.clearMedListBtn, 'click', clearMedList);
+  on(dom.interactionAddForm, 'submit', (event) => {
+    event.preventDefault();
+    addTypedItemToMedList();
+  });
+  on(dom.manualAddBtn, 'click', (event) => {
+    if (!dom.interactionAddForm) {
+      event.preventDefault();
+      addTypedItemToMedList();
+    }
+  });
+  on(dom.saveDrugBtn, 'click', saveSelectedDrug);
+  on(dom.saveNotesBtn, 'click', saveSelectedNotes);
+  on(dom.reviewLabelsBtn, 'click', reviewLabels);
+  on(dom.runInteractionBtn, 'click', reviewLabels);
+  on(dom.exportBtn, 'click', exportNotebook);
+  on(dom.importBtn, 'click', () => dom.importFile?.click());
+  on(dom.importFile, 'change', () => importNotebook(dom.importFile.files?.[0]));
+  on(dom.copyReviewBtn, 'click', async () => {
     if (!appState.lastReviewText) {
       setStatus('Run an interaction analysis before copying a report.', 'error');
       return;
@@ -1739,7 +1754,7 @@ function bindEvents() {
     });
   });
   dom.tabBtns.forEach((button, index) => {
-    button.addEventListener('click', () => setActiveTab(button.getAttribute('data-tab')));
+    button.addEventListener('click', () => setActiveTab(button.getAttribute('data-tab'), { scroll: true }));
     button.addEventListener('keydown', (event) => {
       if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
       event.preventDefault();
@@ -1749,7 +1764,7 @@ function bindEvents() {
       if (event.key === 'Home') nextIndex = 0;
       if (event.key === 'End') nextIndex = dom.tabBtns.length - 1;
       const nextButton = dom.tabBtns[nextIndex];
-      setActiveTab(nextButton.getAttribute('data-tab'));
+      setActiveTab(nextButton.getAttribute('data-tab'), { scroll: true });
       nextButton.focus();
     });
   });
